@@ -7,12 +7,12 @@ public class EnemyStuff : MonoBehaviour {
 
     public GameObject enemy;
     public PlayerController pc;
-    public float speed = 0.01f;
+    private float speed = 0.05f;
     private Rigidbody2D rb2d;
     private bool init;
     private Vector2 position;
     private int value;
-    System.Random rnd;
+    private double angle;
 
     void Start ()
     {
@@ -23,7 +23,6 @@ public class EnemyStuff : MonoBehaviour {
         {
             pc = player.GetComponent<PlayerController>();
         }
-        rnd = new System.Random();
         value = 2;
     }
 	
@@ -31,39 +30,39 @@ public class EnemyStuff : MonoBehaviour {
         if (!init)
         {
             position = new Vector2(transform.position.x, transform.position.y);
+            position *= speed;
+            float distanceOx = 11 - position.x;
+            float distanceOy = position.y;
+            angle = Math.Atan(distanceOy / distanceOx);
             init = true;
         }
         rb2d.AddForce(position);
-        int r = rnd.Next(1, 5);
-        switch(r)
-        {
-            case 1:
-                position.x += (float)(speed);
-                position.y += (float)(speed);
-                break;
-            case 2:
-                position.x -= (float)(speed);
-                position.y += (float)(speed);
-                break;
-            case 3:
-                position.x -= (float)(speed);
-                position.y -= (float)(speed);
-                break;
-            default:
-                position.x += (float)(speed);
-                position.y -= (float)(speed);
-                break;
-        }
+        position.x += (float)Math.Cos(angle) * speed;
+        position.y -= (float)Math.Sin(angle) / 3;
     }
 
-    public void InitEnemy(float x, float y)
+    public void InitEnemy()
     {
-        Instantiate(enemy, new Vector3(x, y, 0), Quaternion.identity);
+        float x = -10;
+        float y = -4;
+
+        while (y <= 4)
+        {
+            Instantiate(enemy, new Vector3(x, y, 0), Quaternion.identity);
+            y += 2;
+        }
     }
 
     void OnTriggerEnter2D(Collider2D other)
     {
-        pc.IncreasePlayerScore(value);
+        if (other is BoxCollider2D)
+        {
+            pc.DecreasePlayerScore(value);
+        }
+        else if (other is CircleCollider2D)
+        {
+            pc.IncreasePlayerScore(value);
+        }
         Destroy(gameObject);
     }
 }
