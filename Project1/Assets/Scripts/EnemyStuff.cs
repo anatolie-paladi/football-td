@@ -41,15 +41,25 @@ public class EnemyStuff : MonoBehaviour {
         position.y -= (float)Math.Sin(angle) / 3;
     }
 
-    public void InitEnemy()
+    public void InitEnemies(int numEnemies)
     {
-        float x = -10;
-        float y = -4;
+        float x = -10.0f;
+        float y = -4.0f;
+        float step = -2.0f * y / (numEnemies - 1);
 
-        while (y <= 4)
+        while (y <= 4.05f)
         {
             Instantiate(enemy, new Vector3(x, y, 0), Quaternion.identity);
-            y += 2;
+            y += step;
+        }
+    }
+
+    public void DestroyEnemies()
+    {
+        EnemyStuff[] enemies = FindObjectsOfType(typeof(EnemyStuff)) as EnemyStuff[];
+        foreach (EnemyStuff enemy in enemies)
+        {
+            Destroy(enemy.gameObject);
         }
     }
 
