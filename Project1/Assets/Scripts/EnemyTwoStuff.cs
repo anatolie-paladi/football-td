@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 
-public class EnemyStuff : MonoBehaviour {
+public class EnemyTwoStuff : MonoBehaviour
+{
 
     public GameObject enemy;
     public PlayerController pc;
@@ -15,7 +16,7 @@ public class EnemyStuff : MonoBehaviour {
     private int lifes;
     private double angle;
 
-    void Start ()
+    void Start()
     {
         rb2d = GetComponent<Rigidbody2D>();
         init = false;
@@ -24,11 +25,12 @@ public class EnemyStuff : MonoBehaviour {
         {
             pc = player.GetComponent<PlayerController>();
         }
-        value = 1;
-        lifes = 1;
+        value = 2;
+        lifes = 2;
     }
-	
-	void Update () {
+
+    void Update()
+    {
         if (!init)
         {
             position = new Vector2(transform.position.x, transform.position.y);
@@ -52,7 +54,7 @@ public class EnemyStuff : MonoBehaviour {
         while (y <= 4.05f)
         {
             GameObject e = Instantiate(enemy, new Vector3(x, y, 0), Quaternion.identity);
-            EnemyStuff es = e.GetComponent<EnemyStuff>();
+            EnemyTwoStuff es = e.GetComponent<EnemyTwoStuff>();
             es.speed *= speedBoost;
             y += step;
         }
@@ -60,8 +62,8 @@ public class EnemyStuff : MonoBehaviour {
 
     public void DestroyEnemies()
     {
-        EnemyStuff[] enemies = FindObjectsOfType(typeof(EnemyStuff)) as EnemyStuff[];
-        foreach (EnemyStuff enemy in enemies)
+        EnemyTwoStuff[] enemies = FindObjectsOfType(typeof(EnemyTwoStuff)) as EnemyTwoStuff[];
+        foreach (EnemyTwoStuff enemy in enemies)
         {
             Destroy(enemy.gameObject);
         }
@@ -75,7 +77,6 @@ public class EnemyStuff : MonoBehaviour {
             pc.DecreasePlayerScore(value);
             Destroy(gameObject);
         }
-        //collision with a ball
         else if (other is CircleCollider2D)
         {
             GameObject obj = other.gameObject;

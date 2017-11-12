@@ -3,19 +3,23 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 
-public class EnemyStuff : MonoBehaviour {
+public class EnemyThreeStuff : MonoBehaviour
+{
 
     public GameObject enemy;
     public PlayerController pc;
-    private float speed = 0.05f;
+    public EnemyBallStuff ebs;
+    private float speed = 0.03f;
     private Rigidbody2D rb2d;
     private bool init;
     private Vector2 position;
     private int value;
     private int lifes;
     private double angle;
+    private int timeBetweenBalls = 2; //seconds
+    private DateTime currentTimeBall;
 
-    void Start ()
+    void Start()
     {
         rb2d = GetComponent<Rigidbody2D>();
         init = false;
@@ -24,16 +28,18 @@ public class EnemyStuff : MonoBehaviour {
         {
             pc = player.GetComponent<PlayerController>();
         }
-        value = 1;
+        value = 3;
         lifes = 1;
+        currentTimeBall = DateTime.Now;
     }
-	
-	void Update () {
+
+    void Update()
+    {
         if (!init)
         {
             position = new Vector2(transform.position.x, transform.position.y);
             position *= speed;
-            float distanceOx = 11 - position.x;
+            float distanceOx = 11.0f - position.x;
             float distanceOy = position.y;
             angle = Math.Atan(distanceOy / distanceOx);
             init = true;
@@ -41,6 +47,14 @@ public class EnemyStuff : MonoBehaviour {
         rb2d.AddForce(position);
         position.x += (float)Math.Cos(angle) * speed;
         position.y -= (float)Math.Sin(angle) / 3;
+
+        DateTime now = DateTime.Now;
+        var diff = (now - currentTimeBall).TotalSeconds;
+        if (diff >= timeBetweenBalls)
+        {
+            ebs.shoot(transform.position.x, transform.position.y, value);
+            currentTimeBall = now;
+        }
     }
 
     public void InitEnemies(int numEnemies, float speedBoost)
@@ -52,7 +66,7 @@ public class EnemyStuff : MonoBehaviour {
         while (y <= 4.05f)
         {
             GameObject e = Instantiate(enemy, new Vector3(x, y, 0), Quaternion.identity);
-            EnemyStuff es = e.GetComponent<EnemyStuff>();
+            EnemyThreeStuff es = e.GetComponent<EnemyThreeStuff>();
             es.speed *= speedBoost;
             y += step;
         }
@@ -60,8 +74,8 @@ public class EnemyStuff : MonoBehaviour {
 
     public void DestroyEnemies()
     {
-        EnemyStuff[] enemies = FindObjectsOfType(typeof(EnemyStuff)) as EnemyStuff[];
-        foreach (EnemyStuff enemy in enemies)
+        EnemyThreeStuff[] enemies = FindObjectsOfType(typeof(EnemyThreeStuff)) as EnemyThreeStuff[];
+        foreach (EnemyThreeStuff enemy in enemies)
         {
             Destroy(enemy.gameObject);
         }

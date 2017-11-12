@@ -13,11 +13,14 @@ public class PlayerController : MonoBehaviour
     //references to other scene objects classes
     public BallStuff bs;
     public EnemyStuff es;
+    public EnemyTwoStuff es2;
+    public EnemyThreeStuff es3;
     //references to text box elements (for displaying various information)
     public Text countText;
     public Text achievementText;
     public Text currentText;
     public Text gameOverText;
+    public Text levelDetailsText;
     //properties elements of the player
     private Animator animator;
 	private Rigidbody2D rb2d;
@@ -36,6 +39,8 @@ public class PlayerController : MonoBehaviour
     private int deltaUpgradeScore = 10;
     //keeps track of the current level
     private int level;
+    //keeps track of the number of enemy waves from current level
+    private int wave;
 
     void Start()
     {
@@ -45,9 +50,11 @@ public class PlayerController : MonoBehaviour
         currentTimeText = DateTime.MinValue;
         score = 0;
         level = 1;
+        wave = 1;
         SetCountText();
         SetAchievementText();
         SetGameOverText();
+        SetLevelDetailsText();
         ShowPoints('N', 0);
     }
  
@@ -58,7 +65,7 @@ public class PlayerController : MonoBehaviour
         //player shooting section
 		if (Input.GetMouseButtonDown(0))
 		{
-			bs.doIt(transform.position.x, transform.position.y);
+			bs.shoot(transform.position.x, transform.position.y);
 		}
 
         //enemy generation section
@@ -66,7 +73,20 @@ public class PlayerController : MonoBehaviour
         var diff = (now - currentTimeEnemies).TotalSeconds;
         if (diff >= timeBetweenWaves)
         {
-            es.InitEnemies(numberEnemies);
+            SetLevelDetailsText();
+            if (level == 1)
+            {
+                es.InitEnemies(numberEnemies, (wave >= 3 ? 2.5f : 1.0f));
+            }
+            else if (level == 2)
+            {
+                es2.InitEnemies(numberEnemies, (wave >= 3 ? 2.5f : 1.0f));
+            }
+            else
+            {
+                es3.InitEnemies(numberEnemies, (wave >= 3 ? 2.5f : 1.0f));
+            }
+            wave++;
             currentTimeEnemies = now;
         }
         ShowPoints('N', 0);
@@ -117,6 +137,8 @@ public class PlayerController : MonoBehaviour
         }
 
         level++;
+        wave = 1;
+        timeBetweenWaves += 2;
 
         //make next background visible
         stadium = GameObject.Find("Stadium_Level" + level);
@@ -138,11 +160,18 @@ public class PlayerController : MonoBehaviour
             
             if (t)
             {
-                t.localScale += new Vector3(0.3f, 0.05f, 0);
+                t.localScale += new Vector3(0.35f, 0.05f, 0);
             }
         }
 
-        es.DestroyEnemies();
+        if (level == 2)
+        {
+            es.DestroyEnemies();
+        }
+        else
+        {
+            es2.DestroyEnemies();
+        }
         score = 0;
         currentTimeEnemies = DateTime.Now;
         numberEnemies += level;
@@ -160,7 +189,7 @@ public class PlayerController : MonoBehaviour
         SetAchievementText();
 
         //level upgrade
-        if (score >= upgradeLevelScore)
+        if ((score >= upgradeLevelScore) && (level < 3))
         {
             UpgradeLevel();
         }
@@ -211,14 +240,7 @@ public class PlayerController : MonoBehaviour
 
     void SetAchievementText()
     {
-        if ((score % 20 == 0) && (score > 0))
-        {
-            achievementText.text = score + " points. On fire!";
-        }
-        else
-        {
-            achievementText.text = "";
-        }
+        achievementText.text = "";
     }
 
     void SetGameOverText()
@@ -231,5 +253,10 @@ public class PlayerController : MonoBehaviour
         {
             gameOverText.text = "";
         }
+    }
+
+    void SetLevelDetailsText()
+    {
+        levelDetailsText.text = "Level " + level + " Wave " + wave;
     }
 }
